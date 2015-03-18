@@ -42,17 +42,13 @@ ms2ts(char *buffer, size_t bufsiz, uint32_t ms)
 }
 
 Subtitles *
-load_subs(const char *path)
+load_subs(FILE *fp)
 {
     Subtitles *subs;
-    FILE *fp;
     char buffer[BUFSZ];
     char text[4*BUFSZ];
     char *ret = buffer;
 
-    fp = fopen(path, "r");
-    if (!fp)
-        return NULL;
     subs = malloc(sizeof(*subs));
     subs->bulk = 256;
     subs->count = 0;
@@ -88,20 +84,15 @@ load_subs(const char *path)
         }
         subs->lines[subs->count++] = line;
     }
-    fclose(fp);
     return subs;
 }
 
 void
-save_subs(Subtitles *subs, const char *path)
+save_subs(FILE *fp, Subtitles *subs)
 {
-    FILE *fp;
     char bufon[13], bufoff[13];
     int i;
 
-    fp = fopen(path, "w");
-    if (!fp)
-        return;
     for (i = 0; i < subs->count; i++) {
         Line line = subs->lines[i];
         fprintf(fp, "%d\r\n", i + 1);
@@ -110,7 +101,6 @@ save_subs(Subtitles *subs, const char *path)
         fprintf(fp, "%s --> %s\r\n", bufon, bufoff);
         fprintf(fp, "%s\r\n", line.text);
     }
-    fclose(fp);
 }
 
 void
@@ -126,12 +116,11 @@ free_subs(Subtitles **subs)
 }
 
 int
-main(int argc, char *argv[])
+main()
 {
     Subtitles *subs;
-    assert(argc == 2);
-    subs = load_subs(argv[1]);
-    save_subs(subs, "test.srt");
+    subs = load_subs(stdin);
+    save_subs(stdout, subs);
     free_subs(&subs);
     return 0;
 }
