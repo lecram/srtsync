@@ -29,12 +29,12 @@ ts2ms(const char *ts)
 }
 
 uint32_t
-hms2ms(char *hms)
+hms2ms(const char *hms)
 {
-    char *str = hms;
+    const char *str = hms;
     uint32_t ms = 0;
     while (*str) {
-        unsigned long n = strtoul(str, &str, 10);
+        unsigned long n = strtoul(str, (char **) &str, 10);
         switch (*str) {
         case 'h': case 'H':
             n *= 60;
@@ -42,11 +42,10 @@ hms2ms(char *hms)
             n *= 60;
         case 's': case 'S':
             n *= 1000;
+        default:
             str++;
         case '\0':
             break;
-        default:
-            str++;
         }
         ms += n;
     }
