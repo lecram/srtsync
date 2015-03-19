@@ -22,7 +22,7 @@ $ srtsync search 5m ipsum amet < lorem_ipsum.srt
 11
 00:05:21,561 --> 00:05:23,057
 Lorem ipsum dolor sit amet.
-$ srtsync search 1h53m cupidatat
+$ srtsync search 1h53m cupidatat < lorem_ipsum.srt
 1234
 01:52:42,213 --> 01:52:43,722
 Excepteur sint occaecat cupidatat non proident.
