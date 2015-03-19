@@ -28,6 +28,14 @@ ts2ms(const char *ts)
     return ms;
 }
 
+uint32_t
+partial2ms(const char *partial)
+{
+    char buffer[] = "00:00:00,000";
+    strcpy(buffer + sizeof(buffer) - strlen(partial) - 1, partial);
+    return ts2ms(buffer);
+}
+
 void
 ms2ts(char *buffer, size_t bufsiz, uint32_t ms)
 {
@@ -79,7 +87,7 @@ load_subs(FILE *fp)
         strcpy(line.text, text);
         /* Add line to subtitles. */
         if (subs->count == subs->bulk) {
-            subs->bulk += subs->bulk >> 1;
+            subs->bulk += subs->bulk / 2;
             subs->lines = realloc(subs->lines, subs->bulk * sizeof(*subs->lines));
         }
         subs->lines[subs->count++] = line;
@@ -88,18 +96,27 @@ load_subs(FILE *fp)
 }
 
 void
+print_line(FILE *fp, Subtitles *subs, int index)
+{
+    Line *line;
+    char bufon[13], bufoff[13];
+
+    fprintf(fp, "%d\r\n", index + 1);
+    line = subs->lines + index;
+    ms2ts(bufon, 13, line->on);
+    ms2ts(bufoff, 13, line->off);
+    fprintf(fp, "%s --> %s\r\n", bufon, bufoff);
+    fprintf(fp, "%s", line->text);
+}
+
+void
 save_subs(FILE *fp, Subtitles *subs)
 {
-    char bufon[13], bufoff[13];
     int i;
 
     for (i = 0; i < subs->count; i++) {
-        Line line = subs->lines[i];
-        fprintf(fp, "%d\r\n", i + 1);
-        ms2ts(bufon, 13, line.on);
-        ms2ts(bufoff, 13, line.off);
-        fprintf(fp, "%s --> %s\r\n", bufon, bufoff);
-        fprintf(fp, "%s\r\n", line.text);
+        print_line(fp, subs, i);
+        fprintf(fp, "\r\n");
     }
 }
 
@@ -116,11 +133,69 @@ free_subs(Subtitles **subs)
 }
 
 int
-main()
+closest(Subtitles *subs, uint32_t ms)
+{
+    int imin, imax;
+
+    imin = 0;
+    imax = subs->count - 1;
+    do {
+        int i = (imin + imax) / 2;
+        uint32_t sms = subs->lines[i].on;
+        if (sms < ms)
+            imin = i + 1;
+        else if (sms > ms)
+            imax = i - 1;
+        else
+            return i;
+    } while (imin < imax);
+    return imin;
+}
+
+int
+contains(Line *line, char *words[], int nwords)
+{
+    char *str = line->text;
+    while (nwords--)
+        if (!(str = strstr(str, *words++)))
+            return 0;
+    return 1;
+}
+
+int
+search(Subtitles *subs, uint32_t ms, char *words[], int nwords)
+{
+#define SRT_CHECK(I) if (contains(&subs->lines[I], words, nwords)) return I
+    int i, s, t;
+
+    i = closest(subs, ms);
+    SRT_CHECK(i);
+    s = 1;
+    while (i-s > 0 && i+s < subs->count) {
+        SRT_CHECK(i-s);
+        SRT_CHECK(i+s);
+        s++;
+    }
+    for (t = i-s; t >= 0; t--)
+        SRT_CHECK(t);
+    for (t = i+s; t < subs->count; t++)
+        SRT_CHECK(t);
+    return -1;
+#undef SRT_CHECK
+}
+
+int
+main(int argc, char *argv[])
 {
     Subtitles *subs;
+    int i;
+
+    if (argc < 2)
+        return 1;
     subs = load_subs(stdin);
-    save_subs(stdout, subs);
+    i = search(subs, partial2ms(argv[1]), argv + 2, argc - 2);
+    if (i >= 0)
+        print_line(stdout, subs, i);
     free_subs(&subs);
     return 0;
 }
