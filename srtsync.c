@@ -149,25 +149,31 @@ free_subs(Subtitles **subs)
 }
 
 void
-shift(Subtitles *subs, int sign, uint32_t ms)
+transform(Subtitles *subs, double factor, int sign, uint32_t offset)
 {
     int i;
 
     for (i = 0; i < subs->count; i++) {
-        subs->lines[i].on += sign * ms;
-        subs->lines[i].off += sign * ms;
+        subs->lines[i].on = subs->lines[i].on * factor + sign * offset;
+        subs->lines[i].off = subs->lines[i].off * factor + sign * offset;
     }
 }
 
 void
-scale(Subtitles *subs, double factor)
+sync(Subtitles *subs, int i1, uint32_t t1, int i2, uint32_t t2)
 {
-    int i;
-
-    for (i = 0; i < subs->count; i++) {
-        subs->lines[i].on *= factor;
-        subs->lines[i].off *= factor;
-    }
+    double factor;
+    int32_t shift;
+    int sign;
+    uint32_t offset;
+    uint32_t t1_old = subs->lines[i1-1].on;
+    uint32_t t2_old = subs->lines[i2-1].on;
+    factor = ((double) (t2 - t1)) / (t2_old - t1_old);
+    shift = t1 - t1_old * factor;
+    fprintf(stderr, "scaled by %g, shifted by %gs\n", factor, shift / 1e3);
+    sign = shift < 0 ? -1 : +1;
+    offset = abs(shift);
+    transform(subs, factor, sign, offset);
 }
 
 int
@@ -231,6 +237,7 @@ usage(FILE *fp)
         "  srtsync search TIME [WORD [WORD [...]]] -- search around TIME\n"
         "  srtsync shift (-TIME|+TIME) -- shift all subtitles by TIME\n"
         "  srtsync scale FACTOR -- multiply all time stamps by FACTOR\n"
+        "  srtsync sync INDEX TIME INDEX TIME -- linearly sync subtitles\n"
         "\n"
     );
 }
@@ -261,7 +268,7 @@ main(int argc, char *argv[])
         }
     } else if (!strcmp(argv[1], "shift") && argc == 3) {
         int sign;
-        uint32_t ms;
+        uint32_t offset;
         char *hms = argv[2];
         switch (*hms) {
         case '-':
@@ -273,11 +280,17 @@ main(int argc, char *argv[])
         default:
             sign = +1;
         }
-        ms = hms2ms(hms);
-        shift(subs, sign, ms);
+        offset = hms2ms(hms);
+        transform(subs, 1, sign, offset);
     } else if (!strcmp(argv[1], "scale") && argc == 3) {
         double factor = atof(argv[2]);
-        scale(subs, factor);
+        transform(subs, factor, 0, 0);
+    } else if (!strcmp(argv[1], "sync") && argc == 6) {
+        int i1 = atoi(argv[2]);
+        uint32_t t1 = hms2ms(argv[3]);
+        int i2 = atoi(argv[4]);
+        uint32_t t2 = hms2ms(argv[5]);
+        sync(subs, i1, t1, i2, t2);
     } else {
         usage(stderr);
         return 1;
