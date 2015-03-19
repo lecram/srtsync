@@ -29,11 +29,26 @@ ts2ms(const char *ts)
 }
 
 uint32_t
-partial2ms(const char *partial)
+hms2ms(char *hms)
 {
-    char buffer[] = "00:00:00,000";
-    strcpy(buffer + sizeof(buffer) - strlen(partial) - 1, partial);
-    return ts2ms(buffer);
+    char *str = hms;
+    uint32_t ms = 0;
+    while (*str) {
+        unsigned long n = strtoul(str, &str, 10);
+        switch (*str) {
+        case 'h': case 'H':
+            n *= 60;
+        case 'm': case 'M':
+            n *= 60;
+        case 's': case 'S':
+            n *= 1000;
+            str++;
+        default:
+            break;
+        }
+        ms += n;
+    }
+    return ms;
 }
 
 void
@@ -193,7 +208,7 @@ main(int argc, char *argv[])
     if (argc < 2)
         return 1;
     subs = load_subs(stdin);
-    i = search(subs, partial2ms(argv[1]), argv + 2, argc - 2);
+    i = search(subs, hms2ms(argv[1]), argv + 2, argc - 2);
     if (i >= 0)
         print_line(stdout, subs, i);
     free_subs(&subs);
