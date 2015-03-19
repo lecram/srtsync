@@ -159,6 +159,17 @@ shift(Subtitles *subs, int sign, uint32_t ms)
     }
 }
 
+void
+scale(Subtitles *subs, double factor)
+{
+    int i;
+
+    for (i = 0; i < subs->count; i++) {
+        subs->lines[i].on *= factor;
+        subs->lines[i].off *= factor;
+    }
+}
+
 int
 closest(Subtitles *subs, uint32_t ms)
 {
@@ -219,6 +230,7 @@ usage(FILE *fp)
         "  srtsync (-h|--help|help) -- print this help message\n"
         "  srtsync search TIME [WORD [WORD [...]]] -- search around TIME\n"
         "  srtsync shift (-TIME|+TIME) -- shift all subtitles by TIME\n"
+        "  srtsync scale FACTOR -- multiply all time stamps by FACTOR\n"
         "\n"
     );
 }
@@ -247,8 +259,7 @@ main(int argc, char *argv[])
             fprintf(stderr, "Not found.\n");
             return 1;
         }
-    }
-    if (!strcmp(argv[1], "shift") && argc == 3) {
+    } else if (!strcmp(argv[1], "shift") && argc == 3) {
         int sign;
         uint32_t ms;
         char *hms = argv[2];
@@ -264,6 +275,12 @@ main(int argc, char *argv[])
         }
         ms = hms2ms(hms);
         shift(subs, sign, ms);
+    } else if (!strcmp(argv[1], "scale") && argc == 3) {
+        double factor = atof(argv[2]);
+        scale(subs, factor);
+    } else {
+        usage(stderr);
+        return 1;
     }
     save_subs(stdout, subs);
     free_subs(&subs);
