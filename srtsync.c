@@ -233,11 +233,11 @@ usage(FILE *fp)
 {
     fprintf(fp,
         "usage:\n"
-        "  srtsync (-h|--help|help) -- print this help message\n"
-        "  srtsync search TIME [WORD [WORD [...]]] -- search around TIME\n"
-        "  srtsync shift (-TIME|+TIME) -- shift all subtitles by TIME\n"
-        "  srtsync scale FACTOR -- multiply all timestamps by FACTOR\n"
-        "  srtsync sync INDEX TIME INDEX TIME -- linearly sync subtitles\n"
+        "  srtsync help\n    print this help message and exit\n"
+        "  srtsync search TIME [WORD [WORD [...]]]\n    search around TIME\n"
+        "  srtsync shift (-TIME|+TIME)\n    shift all subtitles by TIME\n"
+        "  srtsync scale FACTOR\n    multiply all timestamps by FACTOR\n"
+        "  srtsync sync INDEX TIME INDEX TIME\n    linearly sync subtitles\n"
         "\n"
     );
 }
@@ -251,7 +251,7 @@ main(int argc, char *argv[])
         usage(stderr);
         return 1;
     }
-    if (!(strcmp(argv[1], "-h") && strcmp(argv[1], "--help") && strcmp(argv[1], "help"))) {
+    if (!strcmp(argv[1], "help")) {
         usage(stdout);
         return 0;
     }
