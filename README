@@ -35,8 +35,8 @@ can do the following:
 $ srtsync sync 11 5m23s 1234 1h52m47s < lorem_ipsum.srt > lorem_ipsum_sync.srt
 scaled by 1.00052, shifted by +1.272s
 
-Now  we  have  a   file  "lorem_ipsum_sync.srt"  that  with  subtitles
-synchronized to our video file.
+Now we have  a file "lorem_ipsum_sync.srt" with the  same subtitles as
+the original "lorem_ipsum.srt", but synchronized to our video file.
 
 See srtsync(1) for usage details.
 
