@@ -1,0 +1,17 @@
+Building and installing srtsync
+===============================
+
+srtsync does  not depend on any  external library. It can  be compiled
+with the following command:
+
+$ cc -o srtsync srtsync.c
+
+For systems that have a `make` command, a makefile is provided to help
+build and install srtsync:
+
+$ make
+$ sudo make install
+$ make clean
+
+The  DESTDIR and  PREFIX variables  can  be used  to install  it on  a
+non-standard location.
