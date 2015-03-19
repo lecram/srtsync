@@ -1,0 +1,72 @@
+.TH srtsync 1
+.SH NAME
+srtsync \- SubRip synchronization tool
+.SH SYNOPSIS
+.B srtsync help
+.br
+.B srtsync search \fITIME\fR [\fIWORD\fR [\fIWORD\fR [...]]]
+.br
+.B srtsync shift (-\fITIME\fR|+\fITIME\fR)
+.br
+.B srtsync scale \fIFACTOR\fR
+.br
+.B srtsync sync \fIINDEX\fR \fITIME\fR \fIINDEX\fR \fITIME\fR
+.SH DESCRIPTION
+\fBsrtsync\fR provides simple operations that can be used to adjust the
+timestamps in subtitles stored in \fBSubRip\fR (\fI.srt\fR) files.
+.SH USAGE OVERVIEW
+\fBsrtsync\fR does not work with paths or filenames. It reads \fBSubRip\fR data
+from \fIstdin\fR and writes \fBSubRip\fR data to \fIstdout\fR. A typical usage
+of this program from a typical shell has the following form:
+.br
+.B srtsync COMMAND [ARGS] < input.srt [> output.srt]
+.SH COMMANDS
+.TP
+.B help
+Print usage summary and exit.
+.TP
+.B search \fITIME\fR [\fIWORD\fR [\fIWORD\fR [...]]]
+Search for a subtitle around the given \fITIME\fR. Additional \fIWORD\fR
+arguments are optional and restrict the search to subtitles that contain
+\fBall\fR given substrings in the given order, but not necessarily contiguously.
+Print either the first match or \fI"not found"\fR.
+.TP
+.B shift (-\fITIME\fR|+\fITIME\fR)
+Shift the timestamp of all subtitles by the given \fITIME\fR offset.
+.TP
+.B scale \fIFACTOR\fR
+Multiply the timestamp of all subtitles by the given \fIFACTOR\fR.
+.TP
+.B sync \fIINDEX\fR \fITIME\fR \fIINDEX\fR \fITIME\fR
+Linearly adjust the timestamp of all subtitles to match the two points of
+synchronization given. This is done by first scaling and then shifting the
+timestamps. The transformation parameters are inferred from the synchronization
+points and printed to \fIstderr\fR.
+.SH ARGUMENT FORMATS
+.TP
+.I INDEX
+Subtitle indexes must be specified as positive integers. The first subtitle has
+index 1, as defined by the \fBSubRip\fR file format.
+.TP
+.I FACTOR
+Scale factors must be specified as positive decimal values. The decimal point
+character must be the one defined by the current locale.
+.TP
+.I TIME
+Timestamps must be specified in integral value of milliseconds. One-character
+case-insensitive multipliers can be used to easily express hours (h), minutes
+(m) and seconds (s). Concatenation can be used to add different units. Examples:
+.br
+1234    --> 00:00:01,234
+.br
+1h      --> 01:00:00,000
+.br
+1h23m   --> 01:23:00,000
+.br
+43s21   --> 00:00:43,021
+.br
+90m45s  --> 01:30:45,000
+.TP
+.I WORD
+Search queries are usually words, but can be any string expected to be found in
+a subtitle.

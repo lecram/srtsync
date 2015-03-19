@@ -86,7 +86,7 @@ load_subs(FILE *fp)
         if (!ret)
             break;
         assert(atoi(buffer) == subs->count + 1);
-        /* Get time stamps. */
+        /* Get timestamps. */
         fgets(buffer, BUFSZ, fp);
         line.on = ts2ms(buffer);
         line.off = ts2ms(buffer + 17);
@@ -236,7 +236,7 @@ usage(FILE *fp)
         "  srtsync (-h|--help|help) -- print this help message\n"
         "  srtsync search TIME [WORD [WORD [...]]] -- search around TIME\n"
         "  srtsync shift (-TIME|+TIME) -- shift all subtitles by TIME\n"
-        "  srtsync scale FACTOR -- multiply all time stamps by FACTOR\n"
+        "  srtsync scale FACTOR -- multiply all timestamps by FACTOR\n"
         "  srtsync sync INDEX TIME INDEX TIME -- linearly sync subtitles\n"
         "\n"
     );
@@ -263,7 +263,7 @@ main(int argc, char *argv[])
             print_line(stdout, subs, i);
             return 0;
         } else {
-            fprintf(stderr, "Not found.\n");
+            fprintf(stderr, "not found\n");
             return 1;
         }
     } else if (!strcmp(argv[1], "shift") && argc == 3) {
