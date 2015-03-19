@@ -43,8 +43,10 @@ hms2ms(char *hms)
         case 's': case 'S':
             n *= 1000;
             str++;
-        default:
+        case '\0':
             break;
+        default:
+            str++;
         }
         ms += n;
     }
