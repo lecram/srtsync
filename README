@@ -32,11 +32,11 @@ are  clearly out  of  sync with  the video,  as  the timestamps  don't
 coincide with  the previously estimated  values. To synchronize  it we
 can do the following:
 
-$ srtsync sync 11 5m23s 1234 1h52m47s < lorem_ipsum.srt > lorem_ipsum_sync.srt
+$ srtsync sync 11 5m23s 1234 1h52m47s < lorem_ipsum.srt > synced.srt
 scaled by 1.00052, shifted by +1.272s
 
-Now we have  a file "lorem_ipsum_sync.srt" with the  same subtitles as
-the original "lorem_ipsum.srt", but synchronized to our video file.
+Now  we have  a  file  "synced.srt" with  the  same  subtitles as  the
+original "lorem_ipsum.srt", but synchronized to our video file.
 
 See srtsync(1) for usage details.
 
