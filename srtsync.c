@@ -12,8 +12,7 @@ typedef struct Line {
 } Line;
 
 typedef struct Subtitles {
-    int bulk;
-    int count;
+    int bulk, count;
     Line *lines;
 } Subtitles;
 
