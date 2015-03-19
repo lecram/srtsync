@@ -148,6 +148,17 @@ free_subs(Subtitles **subs)
     *subs = NULL;
 }
 
+void
+shift(Subtitles *subs, int sign, uint32_t ms)
+{
+    int i;
+
+    for (i = 0; i < subs->count; i++) {
+        subs->lines[i].on += sign * ms;
+        subs->lines[i].off += sign * ms;
+    }
+}
+
 int
 closest(Subtitles *subs, uint32_t ms)
 {
@@ -200,18 +211,61 @@ search(Subtitles *subs, uint32_t ms, char *words[], int nwords)
 #undef SRT_CHECK
 }
 
+void
+usage(FILE *fp)
+{
+    fprintf(fp,
+        "usage:\n"
+        "  srtsync (-h|--help|help) -- print this help message\n"
+        "  srtsync search TIME [WORD [WORD [...]]] -- search around TIME\n"
+        "  srtsync shift (-TIME|+TIME) -- shift all subtitles by TIME\n"
+        "\n"
+    );
+}
+
 int
 main(int argc, char *argv[])
 {
     Subtitles *subs;
-    int i;
 
-    if (argc < 2)
+    if (argc == 1) {
+        usage(stderr);
         return 1;
+    }
+    if (!(strcmp(argv[1], "-h") && strcmp(argv[1], "--help") && strcmp(argv[1], "help"))) {
+        usage(stdout);
+        return 0;
+    }
     subs = load_subs(stdin);
-    i = search(subs, hms2ms(argv[1]), argv + 2, argc - 2);
-    if (i >= 0)
-        print_line(stdout, subs, i);
+    if (!strcmp(argv[1], "search") && argc >= 3) {
+        int i;
+        i = search(subs, hms2ms(argv[2]), argv + 3, argc - 3);
+        if (i >= 0) {
+            print_line(stdout, subs, i);
+            return 0;
+        } else {
+            fprintf(stderr, "Not found.\n");
+            return 1;
+        }
+    }
+    if (!strcmp(argv[1], "shift") && argc == 3) {
+        int sign;
+        uint32_t ms;
+        char *hms = argv[2];
+        switch (*hms) {
+        case '-':
+            hms++;
+            sign = -1;
+            break;
+        case '+':
+            hms++;
+        default:
+            sign = +1;
+        }
+        ms = hms2ms(hms);
+        shift(subs, sign, ms);
+    }
+    save_subs(stdout, subs);
     free_subs(&subs);
     return 0;
 }
