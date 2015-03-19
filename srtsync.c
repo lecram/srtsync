@@ -170,7 +170,7 @@ sync(Subtitles *subs, int i1, uint32_t t1, int i2, uint32_t t2)
     uint32_t t2_old = subs->lines[i2-1].on;
     factor = ((double) (t2 - t1)) / (t2_old - t1_old);
     shift = t1 - t1_old * factor;
-    fprintf(stderr, "scaled by %g, shifted by %gs\n", factor, shift / 1e3);
+    fprintf(stderr, "scaled by %g, shifted by %+gs\n", factor, shift / 1e3);
     sign = shift < 0 ? -1 : +1;
     offset = abs(shift);
     transform(subs, factor, sign, offset);

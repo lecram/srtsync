@@ -1,0 +1,47 @@
+srtsync -- SubRip synchronization tool
+======================================
+
+srtsync  provides simple  operations that  can be  used to  adjust the
+stimestamps in ubtitles stored in SubRip (.srt) files.
+
+Usually the best  way to synchronize subtitles to a  video is to first
+determine  the correct  timestamp of  two lines  and then  stretch and
+shift all  timestamps to fit the  two fixed points. This  operation is
+more precise when the two reference points are distant from each other
+in time  (e.g. the first  is near the beginning  of the video  and the
+second is near the end).
+
+Let's say we  have a video file  in which the line  "Lorem ipsum dolor
+sit  amet." occurs  at 05:23  and  the line  "Excepteur sint  occaecat
+cupidatat non  proident." occurs at  1:52:47 (of course,  these values
+must be determined with the help of a video player). Supposing we have
+a  file "lorem_ipsum.srt"  with the  video  subtitles, we  can do  the
+following to find those lines in the file:
+
+$ srtsync search 5m ipsum amet < lorem_ipsum.srt
+11
+00:05:21,561 --> 00:05:23,057
+Lorem ipsum dolor sit amet.
+$ srtsync search 1h53m cupidatat
+1234
+01:52:42,213 --> 01:52:43,722
+Excepteur sint occaecat cupidatat non proident.
+
+The first line has  index 11 and the second line  has index 1234. They
+are  clearly out  of  sync with  the video,  as  the timestamps  don't
+coincide with  the previously estimated  values. To synchronize  it we
+can do the following:
+
+$ srtsync sync 11 5m23s 1234 1h52m47s < lorem_ipsum.srt > lorem_ipsum_sync.srt
+scaled by 1.00052, shifted by +1.272s
+
+Now  we  have  a   file  "lorem_ipsum_sync.srt"  that  with  subtitles
+synchronized to our video file.
+
+See srtsync(1) for usage details.
+
+Copyright
+---------
+
+All of the srtsync source code  and documentation is released into the
+public domain and provided without warranty of any kind.
