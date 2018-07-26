@@ -228,6 +228,24 @@ search(Subtitles *subs, uint32_t ms, char *words[], int nwords)
 }
 
 void
+fix(FILE *fpin, FILE *fpout)
+{
+    int num;
+    int count = 1;
+    char buf[BUFSZ];
+
+    while (fscanf(fpin, "%d\r", &num) != EOF) {
+        fprintf(fpout, "%d\r\n", count);
+        do {
+            *buf = 0;
+            fgets(buf, BUFSZ-1, fpin);
+            fputs(buf, fpout);
+        } while (*buf != '\0' && *buf != '\r');
+        count++;
+    }
+}
+
+void
 usage(FILE *fp)
 {
     fprintf(fp,
@@ -252,6 +270,9 @@ main(int argc, char *argv[])
     }
     if (!strcmp(argv[1], "help")) {
         usage(stdout);
+        return 0;
+    } else if (!strcmp(argv[1], "fix") && argc == 2) {
+        fix(stdin, stdout);
         return 0;
     }
     subs = load_subs(stdin);
