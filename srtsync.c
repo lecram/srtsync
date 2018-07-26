@@ -84,7 +84,11 @@ load_subs(FILE *fp)
             ret = fgets(buffer, BUFSZ, fp);
         if (!ret)
             break;
-        assert(atoi(buffer) == subs->count + 1);
+        if (atoi(buffer) != subs->count + 1) {
+            fprintf(stderr, "expected %d, but got %s\n",
+                    subs->count + 1, atoi(buffer));
+            exit(1);
+        }
         /* Get timestamps. */
         fgets(buffer, BUFSZ, fp);
         line.on = ts2ms(buffer);
